@@ -8,13 +8,13 @@ namespace Day26_EmployeePayrollADO.Net
 {
     public class EmployeeRepository
     {
-        //For sql authentication
-        public static string connectionString = @"Server=DESKTOP-TSL9UFS; Initial Catalog =payroll_services; User ID = akash; Password=1997";
-        SqlConnection connection = new SqlConnection(connectionString);
-
+        public static SqlConnection connection { get; set; }
         /// UC 2 : Gets all employees details.
         public void GetAllEmployees()
         {
+            //Creates a new connection for every method to avoid "ConnectionString property not initialized" exception
+            DBConnection dbc = new DBConnection();
+            connection = dbc.GetConnection();
             EmployeeModel model = new EmployeeModel();
             try
             {
@@ -22,7 +22,7 @@ namespace Day26_EmployeePayrollADO.Net
                 {
                     string query = @"select * from dbo.employee_payroll";
                     SqlCommand command = new SqlCommand(query, connection);
-                    this.connection.Open();
+                    connection.Open();
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
@@ -57,18 +57,20 @@ namespace Day26_EmployeePayrollADO.Net
             }
             finally
             {
-                this.connection.Close();
+                connection.Close();
             }
         }
 
         /// Adds the employee.
         public bool AddEmployee(EmployeeModel model)
         {
+            DBConnection dbc = new DBConnection();
+            connection = dbc.GetConnection();
             try
             {
-                using (this.connection)
+                using (connection)
                 {
-                    SqlCommand command = new SqlCommand("dbo.SpAddEmployeeDetails", this.connection);
+                    SqlCommand command = new SqlCommand("dbo.SpAddEmployeeDetails", connection);
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@name", model.EmployeeName);
                     command.Parameters.AddWithValue("@start", model.StartDate);
@@ -82,6 +84,38 @@ namespace Day26_EmployeePayrollADO.Net
                     command.Parameters.AddWithValue("@Income_tax", model.Income_Tax);
                     command.Parameters.AddWithValue("@Net_pay", model.NetPay);
                     connection.Open();
+                    var result = command.ExecuteNonQuery();
+                    connection.Close();
+                    if (result != 0)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+        /// UC 3 : Updates the given empname with given salary into database.
+        public bool UpdateSalaryIntoDatabase(string empName, float basicPay)
+        {
+            DBConnection dbc = new DBConnection();
+            connection = dbc.GetConnection();
+            try
+            {
+                using (connection)
+                {
+                    connection.Open();
+                    string query = @"update dbo.employee_payroll set BasicPay=@p1 where EmpName=@p2";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@p1", basicPay);
+                    command.Parameters.AddWithValue("@p2", empName);
                     var result = command.ExecuteNonQuery();
                     connection.Close();
                     if (result != 0)
