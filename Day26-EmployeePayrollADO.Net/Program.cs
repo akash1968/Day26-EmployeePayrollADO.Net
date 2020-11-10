@@ -6,12 +6,10 @@ namespace Day26_EmployeePayrollADO.Net
     {
         static void Main(string[] args)
         {
-            //UC 2
             EmployeeRepository repository = new EmployeeRepository();
-            repository.GetAllEmployees();
-
-            //UC 3
-            Console.WriteLine(repository.UpdateSalaryIntoDatabase("Teressa", 30000) ? "Update done successfully " : "Update Failed");
+                
+            //UC 5
+            repository.GetEmployeesFromForDateRange("2021 - 02 - 01");
         }
 
         /// <summary>

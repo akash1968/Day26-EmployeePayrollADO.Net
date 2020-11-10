@@ -10,7 +10,7 @@ namespace Day26_EmployeePayrollADO.Net
     {
         public static SqlConnection connection { get; set; }
         /// UC 2 : Gets all employees details.
-        public void GetAllEmployees()
+        public void GetAllEmployees(string query)
         {
             //Creates a new connection for every method to avoid "ConnectionString property not initialized" exception
             DBConnection dbc = new DBConnection();
@@ -20,7 +20,6 @@ namespace Day26_EmployeePayrollADO.Net
             {
                 using (connection)
                 {
-                    string query = @"select * from dbo.employee_payroll";
                     SqlCommand command = new SqlCommand(query, connection);
                     connection.Open();
                     SqlDataReader reader = command.ExecuteReader();
@@ -59,6 +58,11 @@ namespace Day26_EmployeePayrollADO.Net
             {
                 connection.Close();
             }
+        }
+
+        public void UpdateSalaryIntoDatabase(string empName, double basicPay)
+        {
+            throw new NotImplementedException();
         }
 
         /// Adds the employee.
@@ -163,6 +167,15 @@ namespace Day26_EmployeePayrollADO.Net
             {
                 connection.Close();
             }
+        }
+        /// <summary>
+        /// UC 5 : Gets the employees details for a particular date range.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        public void GetEmployeesFromForDateRange(string date)
+        {
+            string query = $@"select * from dbo.employee_payroll where StartDate between cast('{date}' as date) and cast(getdate() as date)";
+            GetAllEmployees(query);
         }
     }
 }
