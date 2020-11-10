@@ -18,5 +18,9 @@ namespace Day26_EmployeePayrollADO.Net
         public double Income_Tax { get; set; }
         public double NetPay { get; set; }
         public DateTime StartDate { get; set; }
+        public int CompanyID { get; set; }
+        public string CompanyName { get; set; }
+        public int DeptID { get; set; }
+        public string DeptName { get; set; }
     }
 }
