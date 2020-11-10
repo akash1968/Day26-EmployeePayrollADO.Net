@@ -214,6 +214,7 @@ namespace Day26_EmployeePayrollADO.Net
                     connection.Close();
             }
         }
+        /// UC 7 : Inserts data into multiple tables using transactions.
         public void InsertIntoMultipleTablesWithTransactions()
         {
             DBConnection dbc = new DBConnection();
@@ -277,13 +278,13 @@ namespace Day26_EmployeePayrollADO.Net
                 try
                 {
                     // Execute 1st command
-                    command.CommandText = "insert into company values(@company_id,@company_name)";
+                    command.CommandText = "insert into companies values(@company_id,@company_name)";
                     command.Parameters.AddWithValue("@company_id", companyId);
                     command.Parameters.AddWithValue("@company_name", companyName);
                     command.ExecuteScalar();
 
                     // Execute 2nd command
-                    command.CommandText = "insert into employee values(@emp_id,@EmpName,@gender,@phone_number,@address,@startDate,@company_id)";
+                    command.CommandText = "insert into employees values(@emp_id,@EmpName,@gender,@phone_number,@address,@startDate,@company_id)";
                     command.Parameters.AddWithValue("@emp_id", empID);
                     command.Parameters.AddWithValue("@EmpName", empName);
                     command.Parameters.AddWithValue("@startDate", startDate);
@@ -293,7 +294,7 @@ namespace Day26_EmployeePayrollADO.Net
                     command.ExecuteScalar();
 
                     // Execute 3rd command
-                    command.CommandText = "insert into payroll values(@emp_id,@Basic_Pay,@Deductions,@Taxable_pay,@Income_tax,@Net_pay)";
+                    command.CommandText = "insert into payrolls values(@emp_id,@Basic_Pay,@Deductions,@Taxable_pay,@Income_tax,@Net_pay)";
                     command.Parameters.AddWithValue("@Basic_Pay", basicPay);
                     command.Parameters.AddWithValue("@Deductions", deductions);
                     command.Parameters.AddWithValue("@Taxable_pay", taxablePay);
@@ -302,13 +303,13 @@ namespace Day26_EmployeePayrollADO.Net
                     command.ExecuteScalar();
 
                     // Execute 4th command
-                    command.CommandText = "insert into department values(@dept_id,@dept_name)";
+                    command.CommandText = "insert into departments values(@dept_id,@dept_name)";
                     command.Parameters.AddWithValue("@dept_id", deptId);
                     command.Parameters.AddWithValue("@dept_name", deptName);
                     command.ExecuteScalar();
 
                     // Execute 5th command
-                    command.CommandText = "insert into employee_dept values(@emp_id,@dept_id)";
+                    command.CommandText = "insert into employee_depts values(@emp_id,@dept_id)";
                     command.ExecuteNonQuery();
 
                     // Commit the transaction after all commands.
@@ -332,6 +333,53 @@ namespace Day26_EmployeePayrollADO.Net
                         Console.WriteLine(exRollback.Message);
                     }
                 }
+            }
+        }
+        /// UC 8 : Retrieves the employee details from multiple tables after implementing E-R concept.
+        public void RetrieveEmployeeDetailsFromMultipleTables()
+        {
+            DBConnection dbc = new DBConnection();
+            connection = dbc.GetConnection();
+            EmployeeModel model = new EmployeeModel();
+            string query = "select e.EmpId,e.EmpName,e.StartDate,e.Gender,e.PhoneNo,e.Address,p.NetPay,d.DeptName from employees e,payrolls p, departments d,employee_depts ed where e.EmpId = p.EmpId and ed.EmpId = e.EmpId and ed.DeptId = d.DeptId";
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand(query, connection);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            model.EmployeeID = reader.GetInt32(0);
+                            model.EmployeeName = reader.GetString(1);
+                            model.StartDate = reader.GetDateTime(2);
+                            model.Gender = reader.GetString(3);
+                            model.PhoneNumber = reader.GetInt64(4);
+                            model.Address = reader.GetString(5);
+                            model.NetPay = reader.GetDouble(6);
+                            model.Department = reader.GetString(7);
+                            Console.WriteLine($"EmpId:{model.EmployeeID}\nEmpName:{model.EmployeeName}\nStartDate:{model.StartDate}\nGender:{model.Gender}\nPhoneNo:{model.PhoneNumber}\nAddress:{model.Address}\nNetPay:{model.NetPay}\nDepartment:{model.Department}");
+                            Console.WriteLine("\n");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No data found");
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State.Equals("Open"))
+                    connection.Close();
             }
         }
     }
