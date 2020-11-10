@@ -7,10 +7,9 @@ namespace Day26_EmployeePayrollADO.Net
         static void Main(string[] args)
         {
             EmployeeRepository repository = new EmployeeRepository();
-                
-            //UC 5
-            repository.GetEmployeesFromForDateRange("2021 - 02 - 01");
-        }
+            //UC 6
+            repository.FindGroupedByGenderData();
+       }
 
         /// <summary>
         /// Adds the new employee into the database.
@@ -21,15 +20,15 @@ namespace Day26_EmployeePayrollADO.Net
             EmployeeModel model = new EmployeeModel();
             model.EmployeeName = "honey";
             model.Address = "Bihar";
-            model.BasicPay = 45;
-            model.Deductions = 454;
+            model.BasicPay = 30000;
+            model.Deductions = 4000;
             model.Department = "IT";
             model.Gender = "F";
             model.PhoneNumber = 983798;
             model.NetPay = 833;
             model.Income_Tax = 32;
             model.StartDate = DateTime.Now;
-            model.TaxablePay = 324;
+            model.TaxablePay = 2300;
             Console.WriteLine(repository.AddEmployee(model) ? "Record inserted successfully " : "Failed");
         }
     }

@@ -10,6 +10,11 @@ namespace Day26_EmployeePayrollADO.Net
     {
         public static SqlConnection connection { get; set; }
         /// UC 2 : Gets all employees details.
+        public void GetFullTableDetails()
+        {
+            string query = @"select * from dbo.employee_payroll";
+            GetAllEmployees(query);
+        }
         public void GetAllEmployees(string query)
         {
             //Creates a new connection for every method to avoid "ConnectionString property not initialized" exception
@@ -59,12 +64,6 @@ namespace Day26_EmployeePayrollADO.Net
                 connection.Close();
             }
         }
-
-        public void UpdateSalaryIntoDatabase(string empName, double basicPay)
-        {
-            throw new NotImplementedException();
-        }
-
         /// Adds the employee.
         public bool AddEmployee(EmployeeModel model)
         {
@@ -107,7 +106,7 @@ namespace Day26_EmployeePayrollADO.Net
             }
         }
         /// UC 3 : Updates the given empname with given salary into database.
-        public bool UpdateSalaryIntoDatabase(string empName, float basicPay)
+        public bool UpdateSalaryIntoDatabase(string empName, double basicPay)
         {
             DBConnection dbc = new DBConnection();
             connection = dbc.GetConnection();
@@ -138,12 +137,7 @@ namespace Day26_EmployeePayrollADO.Net
                 connection.Close();
             }
         }
-        /// <summary>
         /// UC 4 : Reads the updated salary from database.
-        /// </summary>
-        /// <param name="empName">Name of the emp.</param>
-        /// <returns></returns>
-        /// <exception cref="System.Exception"></exception>
         public double ReadUpdatedSalaryFromDatabase(string empName)
         {
             DBConnection dbc = new DBConnection();
@@ -168,14 +162,53 @@ namespace Day26_EmployeePayrollADO.Net
                 connection.Close();
             }
         }
-        /// <summary>
         /// UC 5 : Gets the employees details for a particular date range.
-        /// </summary>
-        /// <param name="date">The date.</param>
         public void GetEmployeesFromForDateRange(string date)
         {
             string query = $@"select * from dbo.employee_payroll where StartDate between cast('{date}' as date) and cast(getdate() as date)";
             GetAllEmployees(query);
+        }
+        /// UC 6 : Finds the grouped by gender data.
+        public void FindGroupedByGenderData()
+        {
+            DBConnection dbc = new DBConnection();
+            connection = dbc.GetConnection();
+            try
+            {
+                using (connection)
+                {
+                    string query = @"select Gender,count(BasicPay) as EmpCount,min(BasicPay) as MinSalary,max(BasicPay) as MaxSalary,sum(BasicPay) as SalarySum,avg(BasicPay) as AvgSalary from dbo.employee_payroll where Gender='M' or Gender='F' group by Gender";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            string gender = reader[0].ToString();
+                            int empCount = reader.GetInt32(1);
+                            double minSalary = reader.GetDouble(2);
+                            double maxSalary = reader.GetDouble(3);
+                            double salarySum = reader.GetDouble(4);
+                            double avgSalary = reader.GetDouble(5);
+                            Console.WriteLine($"Gender:{gender}\nEmpCount:{empCount}\nMinSalary:{minSalary}\nMaxSalary:{maxSalary}\nSalarySum:{salarySum}\nAvgSalary:{avgSalary}\n");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No Data found");
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
         }
     }
 }
